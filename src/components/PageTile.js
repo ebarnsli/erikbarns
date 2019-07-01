@@ -39,7 +39,7 @@ const Title = styled.div`
     padding: 1rem 0;
 `;
 
-export const AppTile = (props) =>
+export const PageTile = (props) =>
     <Tile>
         {props.title && <Title>{props.title}</Title>}
         <a target={"_blank"} href={props.urls[0].url}>

@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
 import './App.css';
 import styled from 'styled-components';
-import {AppTile} from "./components/AppTile";
 import {SideNavigation} from "./components/SideNavigation";
 import * as _ from "lodash";
 import {PageData} from "./static/data";
+import {Page} from "./components/Page";
 
-const FullPage = styled.div`
+export const FullPage = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -16,7 +16,7 @@ const FullPage = styled.div`
  }
 `;
 
-const Title = styled.div`
+export const Title = styled.div`
     font-size: 2rem;
     padding-top: 3rem;
     display:flex;
@@ -40,12 +40,6 @@ const Container = styled.div`
     max-width: 1200px;
 `;
 
-const GridBoi = styled.div`
-    display: grid;
-    width:100%;
-    max-width: 1000px;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-`
 
 class App extends Component {
     constructor(props) {
@@ -103,7 +97,7 @@ class App extends Component {
                             &bull; Software Engineer &bull;
                         </InfoBar>
                     </FullPage>
-                    {PageData.map((page, index) => <FullPagey key={index} index={index + 1} {...page} pages={this.pages}/>)}
+                    {PageData.map((page, index) => <Page key={index} index={index + 1} {...page} pages={this.pages}/>)}
                 </ContentContainer>
                 <SideNavigation
                     scrollUpPage={this.scrollUpPage}
@@ -113,20 +107,6 @@ class App extends Component {
         );
     }
 }
-
-const FullPagey = (props) =>
-    <FullPage ref={(ref) => props.pages[props.index] = ref}>
-        <Title>
-            {props.title}
-        </Title>
-        <GridBoi>
-            {props.pageData.map((tile, index) => <AppTile
-                key={index}
-                imageSrc={tile.imageSrc}
-                urls={tile.urls}
-            />)}
-        </GridBoi>
-    </FullPage>;
 
 
 export default App;
