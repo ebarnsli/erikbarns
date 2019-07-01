@@ -1,7 +1,10 @@
 import React, {Component} from 'react';
 import './App.css';
 import styled from 'styled-components';
-import ImageLoader from 'react-load-image';
+import {AppTile} from "./components/AppTile";
+import {SideNavigation} from "./components/SideNavigation";
+import * as _ from "lodash";
+import {PageData} from "./static/data";
 
 const FullPage = styled.div`
   min-height: 100vh;
@@ -15,7 +18,9 @@ const FullPage = styled.div`
 
 const Title = styled.div`
     font-size: 2rem;
-    padding-top: 2rem;
+    padding-top: 3rem;
+    display:flex;
+    text-align:center;
 `;
 
 const InfoBar = styled.div`
@@ -23,68 +28,74 @@ const InfoBar = styled.div`
     display: flex;
 `;
 
-const Tile = styled.div`
-    padding: 1rem;
-    border-radius: 2rem;
-    display:flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-`;
-
-const FlexDiv = styled.div`
-    display: flex;
-    align-items: center;
-`;
-
-const Link = styled.a`
-    padding: 0 0.5rem;
-`;
-
-const ImageContainer = styled.div`
-    max-width: 15rem;
-    max-height: 15rem;
-    padding: 1rem;
-    img {
-        width: 100%;
-        border-radius: 2rem;
-    }
-`;
-
-const SideNav = styled.div`
-    height: 100vh;
-    width: 20%;
-    position: -webkit-sticky;
-    position: sticky;
-    top: 0;
-`;
 
 const ContentContainer = styled.div`
     width: 100%;
+    position: absolute;
 `;
 
 const Container = styled.div`
     width:100%;
     display:flex;
-    max-width: 800px;
-    margin:auto;
+    max-width: 1200px;
 `;
 
 const GridBoi = styled.div`
     display: grid;
     width:100%;
+    max-width: 1000px;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 `
 
-
 class App extends Component {
+    constructor(props) {
+        super(props);
+
+        this.pages = [null, null, null, null];
+
+        this.state = {
+            step: 0,
+            width: 0,
+            height: 0,
+        };
+
+        this.scrollDownPage = this.scrollDownPage.bind(this);
+        this.scrollUpPage = this.scrollUpPage.bind(this);
+
+    }
+
+    componentDidMount() {
+        this.setState({width: window.innerWidth, height: window.innerHeight});
+    }
+
+    scrollDownPage() {
+        let step = this.getCurrentStep() + 1;
+        if (step < this.pages.length) {
+            window.scrollTo(0, this.pages[step].offsetTop);
+            this.setState({step});
+        }
+    }
+
+    getCurrentStep() {
+        let offsets = this.pages.map(page => page.offsetTop);
+        const value = _.reduce(offsets, (prev, curr) => Math.abs(curr - window.pageYOffset) <= Math.abs(prev - window.pageYOffset) ? curr : prev, -3);
+        const indexOfClosest = this.pages.map(page => page.offsetTop).indexOf(value);
+        return (indexOfClosest !== -1) ? indexOfClosest : 0;
+    }
+
+    scrollUpPage() {
+        let step = this.getCurrentStep() - 1;
+        if (step >= 0) {
+            window.scrollTo(0, this.pages[step].offsetTop);
+            this.setState({step});
+        }
+    }
 
     render() {
         return (
-            <Container className={"main-container"}>
+            <Container>
                 <ContentContainer>
-                    <FullPage>
+                    <FullPage ref={(ref) => this.pages[0] = ref}>
                         <Title>
                             ERIK BARNS
                         </Title>
@@ -92,73 +103,30 @@ class App extends Component {
                             &bull; Software Engineer &bull;
                         </InfoBar>
                     </FullPage>
-                    <FullPage>
-                        <Title>WORK</Title>
-                        <GridBoi>
-                            <AppTile title={"RiksRoom"} imageSrc={"./src/static/rr.jpg"}
-                                     urls={[{
-                                         url: "https://apps.apple.com/us/app/riksroom/id1443213388",
-                                         text: "App Store"
-                                     }]}/>
-                            <AppTile title={"Cheaters Inc"}
-                                     imageSrc={"./src/static/ci.jpg"}
-                                     urls={[
-                                         {
-                                             url: "https://apps.apple.com/us/app/cheaters-inc/id1450998998",
-                                             text: "App Store"
-                                         },
-                                         {
-                                             url: "https://play.google.com/store/apps/details?id=io.github.ebarns.cymbalremake&hl=en_US",
-                                             text: "Google Play"
-                                         },
-
-                                     ]}
-                            />
-                        </GridBoi>
-                    </FullPage>
-                    <FullPage>
-                        <Title>
-                            CONNECT
-                        </Title>
-                        <GridBoi>
-                            <AppTile
-                                imageSrc={"./src/static/gh.png"}
-                                urls={[{
-                                    url: "https://github.com/ebarns",
-                                    text: "GitHub"
-                                }]}
-                            />
-                            <AppTile
-                                imageSrc={"./src/static/li.png"}
-                                urls={[{
-                                    url: "https://www.linkedin.com/in/erik-barns-7a4061ab/",
-                                    text: "LinkedIn"
-                                }]}
-                                primaryUrl={"https://www.linkedin.com/in/erik-barns-7a4061ab/"}
-                            />
-                        </GridBoi>
-                    </FullPage>
+                    {PageData.map((page, index) => <FullPagey key={index} index={index + 1} {...page} pages={this.pages}/>)}
                 </ContentContainer>
-                {/*<SideNav>*/}
-                {/*</SideNav>*/}
+                <SideNavigation
+                    scrollUpPage={this.scrollUpPage}
+                    scrollDownPage={this.scrollDownPage}
+                />
             </Container>
         );
     }
 }
 
-const AppTile = (props) =>
-    <Tile>
-        <div>{props.title}</div>
-        <ImageContainer>
-            <ImageLoader src={props.imageSrc}>
-                <img/>
-                <div>Error</div>
-                <div/>
-            </ImageLoader>
-        </ImageContainer>
-        <FlexDiv>
-            {props.urls.map((url, index) => <Link href={url.url}>{url.text}</Link>)}
-        </FlexDiv>
-    </Tile>
+const FullPagey = (props) =>
+    <FullPage ref={(ref) => props.pages[props.index] = ref}>
+        <Title>
+            {props.title}
+        </Title>
+        <GridBoi>
+            {props.pageData.map((tile, index) => <AppTile
+                key={index}
+                imageSrc={tile.imageSrc}
+                urls={tile.urls}
+            />)}
+        </GridBoi>
+    </FullPage>;
+
 
 export default App;
